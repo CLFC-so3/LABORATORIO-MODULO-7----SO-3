@@ -1,0 +1,78 @@
+- - - - - - - - - - - - - - - - - VIDEO 1 - - - - - - - - - - - - - - - 
+
+-------------------- LINUX SERVIDOR --------------------------
+
+sudo dnf install -y nfs-utils
+sudo systemctl enable --now nfs-server 
+mkdir -p ~/Escritorio/OS3
+cd ~/Escritorio/OS3
+touch adrian{1..100}.txt
+sudo chown -R nobody:nobody ~/Escritorio/OS3
+sudo chmod -R 755 ~/Escritorio/OS3
+
+sudo nano /etc/exports
+(dentro de sudo nano /etc/exports, agregar)
+/home/carlos/Escritorio/OS3 10.0.0.0/24(ro,sync,no_subtree_check)
+
+sudo exportfs -rav
+sudo exportfs -v
+sudo firewall-cmd --add-service=nfs --permanent
+sudo firewall-cmd –reload
+sudo systemctl restart nfs-server
+
+-------------------- LINUX ClIENTE --------------------------
+sudo dnf install -y nfs-utils
+mkdir -p ~/Escritorio/SO3
+sudo mount -t nfs 10.0.0.69:/home/carlos/Escritorio/OS3 /home/carlos/Escritorio/SO3
+ls ~/Escritorio/SO3
+sudo nano /etc/fstab
+10.0.0.69:/home/carlos/Escritorio/OS3 /home/carlos/Escritorio/SO3 nfs defaults 0 0
+sudo reboot
+ls ~/Escritorio/SO3
+- - - - - - - - - - - - - - - - - VIDEO 2 - - - - - - - - - - - - - - - 
+---------- Linux ---------------
+sudo dnf install -y samba* 
+sudo systemctl enable --now smb nmb
+sudo systemctl start nmb smb 
+sudo firewall-cmd --add-service=samba --permanent
+sudo firewall-cmd –reload
+sudo mkdir -p /samba/compartir
+cd /samba/compartir
+touch Adrian{1..100}.txt
+sudo chmod -R 777 /samba/compartir
+sudo chown -R nobody:nobody /samba/compartir
+sudo setsebool -P samba_export_all_rw on
+sudo useradd zamba
+sudo smbpasswd -a zamba
+
+sudo nano /etc/samba/smb.conf
+(dentro de sudo nano /etc/samba/smb.conf, agregar al fondo)
+[compartir]
+   path = /samba/compartir
+   browseable = yes
+   writeable = yes
+   valid users = zamba
+   create mask = 0777
+   directory mask = 0777
+   guest ok = yes
+
+
+sudo systemctl restart smb nmb
+
+
+------------ WINDOWS ----------------
+
+Abre el explorador de archivos y en la barra superior escribe:
+\\10.0.0.69
+Introduce el usuario zamba y su contraseña cuando se te solicite.
+
+    Haz clic derecho sobre la carpeta compartir
+    Selecciona “Conectar a unidad de red”
+    Elige una letra (por ejemplo, Z:)
+    Marca la opción “Volver a conectar al iniciar sesión”
+    Haz clic en Finalizar
+
+Edita el archivo Adrian99.txt, escribe y guarda.
+
+------------- LINUX VERIFICAR ----------------------
+cat /samba/compartir/Adrian99.txt
