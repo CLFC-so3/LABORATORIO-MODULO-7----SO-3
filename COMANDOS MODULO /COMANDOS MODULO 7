@@ -154,6 +154,7 @@ sudo rm -rf /run/samba/*
 
 #PROVISIONAR EL DOMINIO
 ("TIENES QUE LLENARLO TAL CUAL LO PONE AQUI")
+sudo samba-tool domain provision --use-rfc2307 --interactive
 
 Realm [SO3.INET]: SO3.INET 
 Domain [SO3]: SO3 
